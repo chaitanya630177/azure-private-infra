@@ -1,0 +1,31 @@
+
+#local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Exclude override files as they are usually used locally
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include tfplan files as they are usually temporary
+*.tfplan
+
+# Azure DevOps pipeline cache/temp files
+*.azuredevops
+*.tmp
+*.bak
+
+# Sensitive files
+*.pem
+*.key
+*.secrets
+
