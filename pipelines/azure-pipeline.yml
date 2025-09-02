@@ -5,7 +5,7 @@ pool:
     vmImage: 'ubuntu-latest'
 
     variables:
-      - group: Terraform-Infra-Vars   # Secure values from DevOps Library
+      - group: Terraform-Infra-Vars   
 
         stages:
           - stage: Terraform_Init
@@ -24,7 +24,7 @@ pool:
                                                                                             provider: 'azurerm'
                                                                                                       command: 'init'
                                                                                                                 workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-                                                                                                                          backendServiceArm: 'MyServiceConnection'   # Service Connection name
+                                                                                                                          backendServiceArm: 'MyServiceConnection'   
                                                                                                                                     backendAzureRmResourceGroupName: 'tfstate-rg'
                                                                                                                                               backendAzureRmStorageAccountName: 'tfstateaccount'
                                                                                                                                                         backendAzureRmContainerName: 'tfstate'
