@@ -4,17 +4,60 @@ trigger:
 pool:
     vmImage: 'ubuntu-latest'
 
-    steps:
-      - task: TerraformInstaller@1
-          inputs:
-                terraformVersion: 'latest'
+    variables:
+      - group: Terraform-Infra-Vars   # Secure values from DevOps Library
 
-      - script: |
-            terraform init
-                terraform validate
-                    terraform plan -out=tfplan
-                      displayName: 'Terraform Init, Validate, Plan'
+        stages:
+          - stage: Terraform_Init
+              displayName: "Terraform Init"
+                  jobs:
+                      - job: Init
+                            steps:
+                                  - task: TerraformInstaller@1
+                                          displayName: "Install Terraform"
+                                                  inputs:
+                                                            terraformVersion: '1.7.0'
 
-      - script: terraform apply -auto-approve tfplan
-          displayName: 'Terraform Apply'
+                                                                  - task: TerraformTaskV4@4
+                                                                          displayName: "Terraform Init"
+                                                                                  inputs:
+                                                                                            provider: 'azurerm'
+                                                                                                      command: 'init'
+                                                                                                                workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+                                                                                                                          backendServiceArm: 'MyServiceConnection'   # Service Connection name
+                                                                                                                                    backendAzureRmResourceGroupName: 'tfstate-rg'
+                                                                                                                                              backendAzureRmStorageAccountName: 'tfstateaccount'
+                                                                                                                                                        backendAzureRmContainerName: 'tfstate'
+                                                                                                                                                                  backendAzureRmKey: 'terraform.tfstate'
+
+                                                                  - stage: Terraform_Plan
+                                                                      displayName: "Terraform Plan"
+                                                                          dependsOn: Terraform_Init
+                                                                              jobs:
+                                                                                  - job: Plan
+                                                                                        steps:
+                                                                                              - task: TerraformTaskV4@4
+                                                                                                      displayName: "Terraform Plan"
+                                                                                                              inputs:
+                                                                                                                        provider: 'azurerm'
+                                                                                                                                  command: 'plan'
+                                                                                                                                            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+                                                                                                                                                      environmentServiceNameAzureRM: 'MyServiceConnection'
+                                                                                                                                                                commandOptions: '-out=tfplan'
+
+                                                                                              - stage: Terraform_Apply
+                                                                                                  displayName: "Terraform Apply"
+                                                                                                      dependsOn: Terraform_Plan
+                                                                                                          condition: succeeded()
+                                                                                                              jobs:
+                                                                                                                  - job: Apply
+                                                                                                                        steps:
+                                                                                                                              - task: TerraformTaskV4@4
+                                                                                                                                      displayName: "Terraform Apply"
+                                                                                                                                              inputs:
+                                                                                                                                                        provider: 'azurerm'
+                                                                                                                                                                  command: 'apply'
+                                                                                                                                                                            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+                                                                                                                                                                                      environmentServiceNameAzureRM: 'MyServiceConnection'
+                                                                                                                                                                                                commandOptions: '-auto-approve tfplan'
 

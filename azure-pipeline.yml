@@ -1,0 +1,29 @@
+n
+
+pool:
+    vmImage: ubuntu-latest
+
+    variables:
+        - group: azure-credentials # Azure DevOps Variable Group with ARM_CLIENT_ID, ARM_CLIENT_SECRET, etc.
+
+          stages:
+            - stage: Terraform
+                displayName: "Terraform Deployment"
+                    jobs:
+                        - job: Terraform
+                              steps:
+                                    - task: TerraformInstaller@0
+                                            inputs:
+                                                      terraformVersion: '1.6.6'
+
+                                                            - script: terraform init
+                                                                    workingDirectory: terraform/
+                                                                            displayName: "Terraform Init"
+
+                                                                                  - script: terraform plan -out=tfplan
+                                                                                          workingDirectory: terraform/
+                                                                                                  displayName: "Terraform Plan"
+
+                                                                                                        - script: terraform apply -auto-approve tfplan
+                                                                                                                workingDirectory: terraform/
+                                                                                                                        displayName: "Terraform Apply"

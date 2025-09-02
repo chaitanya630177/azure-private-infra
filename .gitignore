@@ -29,3 +29,5 @@ override.tf.json
 *.key
 *.secrets
 
+*.swp
+
